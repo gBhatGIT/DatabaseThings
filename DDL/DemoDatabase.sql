@@ -49,7 +49,7 @@ schema names are applied to top-level objects, like table names.
 */
 CREATE TABLE Customers
 (
-     -- The body of a CREATE TABLE will identify a comma-separated list of
+    -- The body of a CREATE TABLE will identify a comma-separated list of
     -- Column Declarations and Table Constraints.
     CustomerNumber  int
         -- The following is a PRIMARY KEY constraint that has a specific name
@@ -66,47 +66,87 @@ CREATE TABLE Customers
     LastName        varchar(60)         NOT NULL,
     [Address]       varchar(40)         NOT NULL,
     City            varchar(35)         NOT NULL,
-    Province        char(2)             NOT NULL,
-    PostalCode      char(6)             NOT NULL,
-    PhoneNumber     char(13)                NULL  -- NULL means the data is optional
+    Province        char(2)             
+     -- A DEFAULT constraint will supply a default value for a column
+        -- whenever no value is supplied when adding a row of data
+        CONSTRAINT DF_Customers_Province
+            DEFAULT ('AB')
+        -- A CHECK constraint ensures that only the specified value(s)
+        -- will be accepted when adding a row of data
+        CONSTRAINT CK_Customers_Province
+            CHECK (Province = 'AB' OR
+                   Province = 'BC' OR
+                   Province = 'SK' OR
+                   Province = 'MB' OR
+                   Province = 'QC' OR
+                   Province = 'ON' OR
+                   Province = 'NT' OR
+                   Province = 'NS' OR
+                   Province = 'NB' OR
+                   Province = 'NL' OR
+                   Province = 'YK' OR
+                   Province = 'NU' OR
+                   Province = 'PE')
+                                        NOT NULL,
+    
+    
+   PostalCode      char(6)
+        CONSTRAINT CK_Customers_PostalCode
+            CHECK (PostalCode LIKE '[A-Z][0-9][A-Z][0-9][A-Z][0-9]')
+                                        NOT NULL,
+    PhoneNumber     char(13)
+        CONSTRAINT CK_Customers_PhoneNumber
+            CHECK (PhoneNumber LIKE '([0-9][0-9][0-9])[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]')
+                                            NULL  -- NULL means the data is optional
+
+
 )
 
 CREATE TABLE Orders
 (
 
-      OrderNumber     int
+     OrderNumber     int
         CONSTRAINT PK_Orders_OrderNumber
             PRIMARY KEY
         IDENTITY(200, 1)                NOT NULL,
     CustomerNumber  int
         -- Foreign Key constraints ensure that when a row of data is being
-        -- inserted or updated, there is a row in the referenced table
-        -- that has the same value as its Primary Key
+        -- inserted or updated in this table, there is a row in the
+        -- referenced table that has the same value in its Primary Key.
         CONSTRAINT FK_Orders_CustomerNumber_Customers_CustomerNumber
             FOREIGN KEY REFERENCES
             Customers(CustomerNumber)   NOT NULL,
     [Date]          datetime            NOT NULL,
-    Subtotal        money               NOT NULL,
-    GST             money               NOT NULL,
-    Total           money               NOT NULL
+     Subtotal        money
+        CONSTRAINT CK_Orders_Subtotal
+            CHECK (Subtotal > 0)        NOT NULL,
+   GST             money
+        CONSTRAINT CK_Orders_GST
+            CHECK (GST >= 0)            NOT NULL,
+            CurrentSalePrice    money
+        CONSTRAINT CK_InventoryItems_CurrentSalePrice
+            CHECK (CurrentSalePrice > 0)    NOT NULL,
+    Total           money                NOT NULL
+      -- Table-level constraint on two columns being compared to each other
+  
+      
 )
 
 CREATE TABLE InventoryItems
 (
-   ItemNumber          varchar(5)
+  ItemNumber          varchar(5)
         CONSTRAINT PK_InventoryItems_ItemNumber
             PRIMARY KEY                     NOT NULL,
     ItemDescription     varchar(50)             NULL,
-    CurrentSalePrice    money
-        CONSTRAINT CK_InventoryItems_CurrentSalePrice
-            CHECK (CurrentSalePrice > 0)    NOT NULL,
+   CurrentSalePrice    money
+          NOT NULL,
     InStockCount        int                 NOT NULL,
     ReorderLevel        int                 NOT NULL
 )
 
 CREATE TABLE OrderDetails
 (
-    OrderNumber     int
+     OrderNumber     int
         CONSTRAINT FK_OrderDetails_OrderNumber_Orders_OrderNumber
             FOREIGN KEY REFERENCES
             Orders(OrderNumber)         NOT NULL,
@@ -114,8 +154,14 @@ CREATE TABLE OrderDetails
         CONSTRAINT FK_OrderDetails_ItemNumber_InventoryItems_ItemNumber
             FOREIGN KEY REFERENCES
             InventoryItems(ItemNumber)  NOT NULL,
-    Quantity        int                 NOT NULL,
-    SellingPrice    money               NOT NULL,
+    Quantity        int
+        CONSTRAINT DF_OrderDetails_Quantity
+            DEFAULT (1)
+        CONSTRAINT CK_OrderDetails_Quantity
+            CHECK (Quantity > 0)        NOT NULL,
+   SellingPrice    money
+        CONSTRAINT CK_OrderDetails_SellingPrice
+            CHECK (SellingPrice >= 0)   NOT NULL,
     Amount          AS Quantity * SellingPrice  ,
     -- The following is a Table Constraint
     -- A composite primary key MUST be done as a Table Constraint
