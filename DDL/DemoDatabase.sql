@@ -236,7 +236,13 @@ IF OBJECT_ID('CK_Customers_LastName', 'C') IS NOT NULL
 
 ALTER TABLE Customers
     ADD CONSTRAINT CK_Customers_LastName
-        CHECK (LastName LIKE '[A-Z][A-Z]%')
+        CHECK (LastName LIKE '[A-Z][A-Z]%') -- two letters plus any other chars
+							/* \1/   \1/ */
+							--positive match for 'Fred'
+							--positive match for 'Wu'
+							--negative match for 'F'
+							--negative match for '2udor'
+
 
 -- Once the ALTER TABLE changes are made for A) and B),
 -- we can insert Customer information allowing certain columns to be NULL.
@@ -419,6 +425,10 @@ PRINT ''
 
 /*
 A) allow address, city, province, and postal code to be null
+
+
+
+
 B) add a check constraint on the first and last name to require at least 2 letters 
 c) add an extra bit of info on the customer table, the client wants to start tracking customer emails, so they can send out statements for outstanding payments that are due 
 at the end of the month
