@@ -400,3 +400,37 @@ WHERE  ItemDescription LIKE '%Belt%'
 --    And, we want to get rid of some inventory
 DELETE FROM InventoryItems
 WHERE  ItemNumber IN ('GR47D', 'KD5-Q')
+
+
+select * from InventoryItems
+
+--notice how the data in the inventoryitems is already sorted by the PK 
+--this is because the PK of a table is (by default) a clustered index
+--let's do another set of dml statements to add more data to the database
+PRINT 'Inserting an order'
+INSERT INTO Orders(CustomerNumber,[Date],Subtotal,GST)
+	VALUES	 (100,GETDATE(), 17 , 45, 0.87)
+INSERT INTO OrderDetails(OrderNumber,ItemNumber,Quantity,SellingPrice)
+	VALUES (200,'H8726',1,17.45 )
+PRINT '--END OF ORDER DATA--'
+PRINT ''
+
+--Change request 
+
+/*
+A) allow address, city, province, and postal code to be null
+B) add a check constraint on the first and last name to require at least 2 letters 
+c) add an extra bit of info on the customer table, the client wants to start tracking customer emails, so they can send out statements for outstanding payments that are due 
+at the end of the month
+d) add indexes to the customer's first name and last name columns
+E) add a default constraint on the orders.date column to use the current date
+F) change the inventoryitems.Description column to be not null 
+G) add an index on the item's description column, to improve search. 
+H) data change requests: All inventory items that are less than $5.00 have to have their prices increased by 10%
+
+
+
+
+*/
+
+/* ===================== PRACTICE SQL BELOW ================== */
