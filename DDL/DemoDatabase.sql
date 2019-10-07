@@ -229,19 +229,25 @@ IF OBJECT_ID('CK_Customers_FirstName', 'C') IS NOT NULL -- 'C' specifies that I'
 
 ALTER TABLE Customers
     ADD CONSTRAINT CK_Customers_FirstName
-        CHECK (FirstName LIKE '[A-Z][A-Z]%')
+        CHECK (FirstName LIKE '[A-Z][A-Z]%') -- two letters plus any other chars
+							/* \1/   \1/ */
+							--positive match for 'Fred'
+							--positive match for 'Wu'
+							--negative match for 'F'
+							--negative match for '2udor'
+
 
 IF OBJECT_ID('CK_Customers_LastName', 'C') IS NOT NULL
     ALTER TABLE Customers DROP CONSTRAINT CK_Customers_LastName
 
 ALTER TABLE Customers
     ADD CONSTRAINT CK_Customers_LastName
-        CHECK (LastName LIKE '[A-Z][A-Z]%') -- two letters plus any other chars
-							/* \1/   \1/ */
-							--positive match for 'Fred'
-							--positive match for 'Wu'
-							--negative match for 'F'
-							--negative match for '2udor'
+        CHECK (LastName LIKE '[A-Z][A-Z]%')
+
+
+						
+
+
 
 
 -- Once the ALTER TABLE changes are made for A) and B),
